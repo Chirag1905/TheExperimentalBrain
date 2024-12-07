@@ -1,0 +1,51 @@
+.config {
+  position: relative;
+  background-color: var(--background-color-gray);
+  border-radius: 10px;
+  flex: 1;
+}
+
+.config > div {
+  width: 100%;
+}
+
+.panel {
+  margin-bottom: var(--spacing);
+}
+
+.list {
+  margin-bottom: var(--spacing);
+  overflow-y: auto;
+}
+
+.z-title {
+  padding: var(--spacing) 0;
+}
+
+.inner {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing);
+  height: 88vh;
+}
+
+.header {
+  padding: var(--spacing);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .config {
+    padding: 0 var(--spacing);
+  }
+
+  .inner {
+    height: auto;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .config {
+    border-radius: 0;
+  }
+}
