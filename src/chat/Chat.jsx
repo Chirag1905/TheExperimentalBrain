@@ -13,6 +13,7 @@ import { Search } from '../components/Search';
 import Loadding from './Loadding.jsx';
 import styles from './style/chat.module.less';
 import './style/style.less';
+import ChatInstitution from './ChatInstitution.jsx';
 
 export default function Chat() {
   const { is, setSearch } = useGlobal();
@@ -23,7 +24,7 @@ export default function Chat() {
   };
 
   return (
-    <Suspense fallback={<Loadding/>}>
+    <Suspense fallback={<Loadding />}>
       <div className={classnames(styles.chat, chatStyle)}>
         <div className={styles.chat_inner}>
           <ChatSideBar />
@@ -31,6 +32,8 @@ export default function Chat() {
             <ChatRegister />
           ) : is.ChatApi ? (
             <ChatApi />
+          ) : is.ChatInstitution ? (
+            <ChatInstitution />
           ) : is.config ? (
             <ChatOptions />
           ) : (

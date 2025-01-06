@@ -91,6 +91,7 @@ export default function ChatLogin() {
                 "current": 0,
                 "currentChat": 0,
                 "is": {
+                    "ChatInstitution": false,
                     "ChatApi": false,
                     "ChatRegister": false,
                     "apps": true,

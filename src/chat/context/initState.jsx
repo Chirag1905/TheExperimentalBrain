@@ -1,10 +1,10 @@
 export const initState = {
   conversation: [],
   current: 0,
-  search_text:"",
-  selected_grade:"",
-  selected_attachment:"",
-  chat:[],
+  search_text: "",
+  selected_grade: "",
+  selected_attachment: "",
+  chat: [],
   chats: [
     {
       title: "Generate useLocalStorage",
@@ -78,7 +78,8 @@ export const initState = {
     thinking: false,
     apps: true,
     ChatRegister: false,
-    ChatApi: false
+    ChatApi: false,
+    ChatInstitution: false,
   },
   typeingMessage: {},
   version: "0.1.0",

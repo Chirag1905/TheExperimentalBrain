@@ -13,7 +13,7 @@ export default function ChatSideBar() {
     const { setGeneral } = useOptions();
     // const { options.general.theme } = props;
     return (
-        <Suspense fallback={<Loadding/>}>
+        <Suspense fallback={<Loadding />}>
             <div className={classnames(styles.sider, 'flex-c-sb flex-column')}>
                 <Avatar src={options.general.theme !== 'dark' && imageUrl} />
                 <div className={classnames(styles.tool, 'flex-c-sb flex-column')}>
@@ -26,7 +26,7 @@ export default function ChatSideBar() {
                         className={styles.icon}
                         type='push-right'
                         onClick={() => {
-                            setState({ is: { ...is, config: false, ChatRegister: false, ChatApi: false } });
+                            setState({ is: { ...is, config: false, ChatRegister: false, ChatApi: false, ChatInstitution: false } });
                             localStorage.removeItem("userData");
                             location.reload();
                             // setState({ is: { ...is, config: !is.config, register: false } })
@@ -53,7 +53,7 @@ export default function ChatSideBar() {
                         className={styles.icon}
                         type='config'
                         onClick={() =>
-                            setState({ is: { ...is, config: !is.config, ChatRegister: false, ChatApi: false } })
+                            setState({ is: { ...is, config: !is.config, ChatRegister: false, ChatApi: false, ChatInstitution: false } })
                         }
                     />
                     {/*<Icon
