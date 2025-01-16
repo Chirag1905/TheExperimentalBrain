@@ -150,41 +150,69 @@ export default function ChatInstitution() {
                                         <table className="user-table">
                                             <thead>
                                                 <tr>
-                                                    <th>#</th>
-                                                    <th>APIs</th>
-                                                    <th>Manage</th>
+                                                    <th>SL No</th>
+                                                    <th>Techvein ID</th>
+                                                    <th>Client Name</th>
+                                                    <th>Application URL</th>
+                                                    <th>Redirect URL</th>
+                                                    <th>Client ID</th>
+                                                    <th>Client Secret</th>
+                                                    <th>EDVEIN Username</th>
+                                                    <th>EDVEIN Password</th>
+                                                    <th>Edit</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {listings?.length > 0 && listings?.map((apidata, index) => (
                                                     <tr key={index}>
                                                         <td>{index + 1}</td>
-                                                        <td>
-                                                            {editApi?.id === apidata?.id ? (
-                                                                <input
-                                                                    type="text"
-                                                                    className="form-control"
-                                                                    value={editApi?.apiKey}
-                                                                    onChange={(e) => setEditApi({ ...editApi, apiKey: e.target.value })}
-                                                                />
-                                                            ) : (
-                                                                apidata.apiKey
-                                                            )}
-                                                        </td>
+                                                        <td>{apidata?.id || 'N/A'}</td>
+                                                        <td>{apidata?.clientName || 'N/A'}</td>
+                                                        <td>{apidata?.appUrl || 'N/A'}</td>
+                                                        <td>{apidata?.redirectUrl || 'N/A'}</td>
+                                                        <td>{apidata?.clientId || 'N/A'}</td>
+                                                        <td>{apidata?.clientServer || 'N/A'}</td>
+                                                        <td>{apidata?.edveinName || 'N/A'}</td>
+                                                        <td>{apidata?.edveinPsswd || 'N/A'}</td>
                                                         <td>
                                                             {editApi?.id === apidata?.id ? (
                                                                 <>
-                                                                    <button type="button" onClick={() => handleUpdate(apidata?.id)} className="button"><IoMdCheckmark /></button>
-                                                                    <button type="button" onClick={handleCancelEdit} className="button"><FaXmark /></button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleUpdate(apidata?.id)}
+                                                                        className="button"
+                                                                    >
+                                                                        <IoMdCheckmark />
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={handleCancelEdit}
+                                                                        className="button"
+                                                                    >
+                                                                        <FaXmark />
+                                                                    </button>
                                                                 </>
                                                             ) : (
-                                                                <button type="button" onClick={() => handleEditClick(apidata)} className="button"><FaRegEdit /></button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleEditClick(apidata)}
+                                                                    className="button"
+                                                                >
+                                                                    <FaRegEdit />
+                                                                </button>
                                                             )}
-                                                            {/* <button type="button" onClick={() => handleDelete(apidata?.id)} className="button"><FaTrash /></button> */}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleDelete(apidata?.id)}
+                                                                className="button"
+                                                            >
+                                                                <FaTrash />
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 ))}
                                             </tbody>
+
                                         </table>
                                     </div>
                                 </div>
