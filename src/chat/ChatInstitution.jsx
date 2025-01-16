@@ -58,8 +58,15 @@ export default function ChatInstitution() {
 
     //Listing Apikey
     const handleListings = async () => {
+        const token = JSON.parse(localStorage.getItem("userData"))?.token || null;
         try {
-            const response = await axios.get(`${apiUrl}/api`);
+            const response = await axios.get(`http://192.46.208.144:8080/experimentalbrain/api/v1/techclient/alltechveinclients`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
+            );
             setListings(response?.data);
         } catch (error) {
             toast?.error("Failed to fetch listings");
@@ -119,7 +126,7 @@ export default function ChatInstitution() {
                             <div className="inline-col dfsfd">
                                 <div className="card">
                                     <div className="card-body">
-                                        <h5 className="card-title">Add API Keys</h5>
+                                        <h5 className="card-title">Institution Creation</h5>
                                     </div>
                                     <form className="form-inline" onSubmit={handleApi}>
                                         <div className="input-group">
@@ -149,15 +156,15 @@ export default function ChatInstitution() {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {listings.map((apidata, index) => (
+                                                {listings?.length > 0 && listings?.map((apidata, index) => (
                                                     <tr key={index}>
                                                         <td>{index + 1}</td>
                                                         <td>
-                                                            {editApi.id === apidata.id ? (
+                                                            {editApi?.id === apidata?.id ? (
                                                                 <input
                                                                     type="text"
                                                                     className="form-control"
-                                                                    value={editApi.apiKey}
+                                                                    value={editApi?.apiKey}
                                                                     onChange={(e) => setEditApi({ ...editApi, apiKey: e.target.value })}
                                                                 />
                                                             ) : (
@@ -165,15 +172,15 @@ export default function ChatInstitution() {
                                                             )}
                                                         </td>
                                                         <td>
-                                                            {editApi.id === apidata.id ? (
+                                                            {editApi?.id === apidata?.id ? (
                                                                 <>
-                                                                    <button type="button" onClick={() => handleUpdate(apidata.id)} className="button"><IoMdCheckmark /></button>
+                                                                    <button type="button" onClick={() => handleUpdate(apidata?.id)} className="button"><IoMdCheckmark /></button>
                                                                     <button type="button" onClick={handleCancelEdit} className="button"><FaXmark /></button>
                                                                 </>
                                                             ) : (
                                                                 <button type="button" onClick={() => handleEditClick(apidata)} className="button"><FaRegEdit /></button>
                                                             )}
-                                                            <button type="button" onClick={() => handleDelete(apidata.id)} className="button"><FaTrash /></button>
+                                                            {/* <button type="button" onClick={() => handleDelete(apidata?.id)} className="button"><FaTrash /></button> */}
                                                         </td>
                                                     </tr>
                                                 ))}

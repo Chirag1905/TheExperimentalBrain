@@ -9,7 +9,6 @@ import './style/chatlogin.less'
 export default function ChatLogin() {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
     const [showChat, setShowChat] = useState(localStorage.getItem("userData") ? localStorage.getItem("userData") : false);
-    const [schoolID, setSchoolID] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -143,47 +142,93 @@ export default function ChatLogin() {
         }
     };
 
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     try {
+    //         // Construct the first API URL with query parameters
+    //         const firstApiResponse = await axios.post(
+    //             "http://192.46.208.144:8080/experimentalbrain/auth/login",
+    //             {
+    //                 "userName": email,
+    //                 "password": password,
+    //             },
+    //             {
+    //                 headers: { "Content-Type": "application/json" },
+    //             }
+    //         );
+
+    //         if (firstApiResponse?.status === 200) {
+    //             const userData = {
+    //                 email: "userName",
+    //                 role: "User",
+    //             };
+    //             localStorage.setItem("userData", JSON.stringify(userData));
+    //             toast.success("Login Successful");
+    //             setShowChat(true);
+    //             console.log("Login successful via first API");
+    //             return;
+    //         }
+    //     } catch (error) {
+    //         console.log(`Login error: ${error.message}`);
+    //     }
+
+    //     try {
+    //         // Second API call
+    //         const response = await axios.get(`${apiUrl}/users`, {
+    //             headers: { "Content-Type": "application/json" },
+    //         });
+
+    //         if (response?.status !== 200) {
+    //             throw new Error("Failed to fetch user data");
+    //         }
+
+    //         const users = response.data;
+    //         const user = users.find((user) => user.email === email);
+
+    //         if (!user) {
+    //             toast.warn("User not found");
+    //             return;
+    //         }
+
+    //         if (user.password !== password) {
+    //             toast.error("Incorrect password");
+    //             return;
+    //         }
+
+    //         delete user.password;
+    //         localStorage.setItem("userData", JSON.stringify(user));
+    //         toast.success("Login Successful");
+    //         console.log("Login successful via second API");
+    //         await handleSession(); // Ensure session is handled before showing chat
+    //         setShowChat(true);
+    //     } catch (error) {
+    //         toast.error(`Login error: ${error.message}`);
+    //     }
+    // };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // try {
-        //     // Construct the first API URL with query parameters
-        //     const firstApiResponse = await axios.post(
-        //         `http://192.46.208.144:8080/experimentalbrain/api/v1/applogin?schooltenant=${schoolID}&uname=${email}&upsswd=${password}`,
-        //         null, // No data in the request body
-        //         {
-        //             headers: { "Content-Type": "application/json" },
-        //         }
-        //     );
 
-        //     if (firstApiResponse?.status === 200) {
-        //         // If first API returns 200, set showChat to true and exit function
-        //         setShowChat(true);
-        //         toast.success("Login Successful");
-        //         console.log("Login successful via first API");
-        //         return;
-        //     }
-        // } catch (error) {
-        //     // If there's an error with the first API or status is not 200, proceed to the second API
-        //     console.log(`Login error: ${error.message}`);
-        //     // toast.warn("First API failed, checking with second API...");
-        // }
-
+        // First API login attempt
         try {
-            // Construct the first API URL with query parameters
             const firstApiResponse = await axios.post(
-                `http://192.46.208.144:8080/experimentalbrain/api/v1/applogin?schooltenant=${schoolID}&uname=${email}&upsswd=${password}`,
-                null, // No data in the request body
+                "http://192.46.208.144:8080/experimentalbrain/auth/login",
+                {
+                    userName: email,
+                    password,
+                },
                 {
                     headers: { "Content-Type": "application/json" },
                 }
             );
 
-            if (firstApiResponse?.status === 200) {
-                // If first API returns 200, set localStorage and showChat
+            // Check response for success
+            if (firstApiResponse?.data?.status === 200 && firstApiResponse?.data?.token) {
                 const userData = {
-                    id: schoolID,
-                    email: email,
-                    role: "User", // Set default role to 'user'
+                    email,
+                    role: "Admin",
+                    token: firstApiResponse.data.token,
+                    expiresAt: Date.now() + firstApiResponse.data.expiresIn,
                 };
                 localStorage.setItem("userData", JSON.stringify(userData));
                 toast.success("Login Successful");
@@ -191,19 +236,32 @@ export default function ChatLogin() {
                 console.log("Login successful via first API");
                 return;
             }
+
+            // If no token or unexpected structure, treat as failure
+            const errorDescription = firstApiResponse?.data?.properties?.description || "Login failed: Invalid response structure";
+            toast.error(errorDescription);
+            console.warn("Login failed via first API");
         } catch (error) {
-            // If there's an error with the first API or status is not 200, proceed to the second API
-            console.log(`Login error: ${error.message}`);
+            // Handle error cases
+            if (error.response) {
+                const errorDescription = error.response.data?.properties?.description || "An error occurred";
+                toast.error(`Login failed: ${errorDescription}`);
+                console.error("First API Login Error:", errorDescription);
+            } else {
+                // Network or unexpected errors
+                console.error("First API Login Error:", error.message);
+                toast.error("An error occurred while trying to log in.");
+            }
         }
 
+        // Secondary API login attempt
         try {
-            // Second API call
             const response = await axios.get(`${apiUrl}/users`, {
                 headers: { "Content-Type": "application/json" },
             });
 
             if (response?.status !== 200) {
-                throw new Error("Failed to fetch user data");
+                throw new Error("Failed to fetch user data from secondary API");
             }
 
             const users = response.data;
@@ -219,16 +277,20 @@ export default function ChatLogin() {
                 return;
             }
 
+            // Valid user, proceed with login
             delete user.password;
             localStorage.setItem("userData", JSON.stringify(user));
             toast.success("Login Successful");
             console.log("Login successful via second API");
-            await handleSession(); // Ensure session is handled before showing chat
+            await handleSession();
             setShowChat(true);
         } catch (error) {
+            console.error("Second API Login Error:", error.message);
             toast.error(`Login error: ${error.message}`);
         }
     };
+
+
 
     return (
         <Suspense fallback={<Loadding />}>
@@ -245,17 +307,6 @@ export default function ChatLogin() {
                                 <form onSubmit={handleSubmit}>
                                     <img className="image" src={experimental_brain_logo} alt="experimental_brain_logo" />
                                     <label htmlFor="chk" aria-label="" className="login-label-sign-in">Login</label>
-                                    <input
-                                        id="schoolID"
-                                        name="schoolID"
-                                        type="text"
-                                        // autoComplete="schoolID"
-                                        // required
-                                        value={schoolID}
-                                        onChange={(e) => setSchoolID(e.target.value)}
-                                        placeholder="School ID"
-                                        className="input-class"
-                                    />
                                     <input
                                         id="email"
                                         name="email"
@@ -281,15 +332,6 @@ export default function ChatLogin() {
                                     <button type="submit" className="login-button">Sign In</button>
                                 </form>
                             </div>
-
-                            {/* <div className="login">
-                                <form>
-                                    <label htmlFor="chk" aria-hidden="true" className="login-label">Register</label>
-                                    <input type="email" name="email" placeholder="Email" className="input-class" required />
-                                    <input type="password" name="pswd" placeholder="Password" className="input-class" required />
-                                    <button onClick={(() => toast.warn("Only admin can register "))} className="login-button">Sign Up</button>
-                                </form>
-                            </div> */}
                         </div>
                     </div>
                 </>
