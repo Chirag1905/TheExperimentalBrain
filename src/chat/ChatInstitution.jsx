@@ -5,12 +5,12 @@ import { Title } from '../components/Title';
 import { classnames } from '../components/utils';
 import { toast, ToastContainer } from "react-toastify";
 import { FaRegEdit } from "react-icons/fa";
-import { FaTrash, FaXmark } from "react-icons/fa6"
+import { FaTrash, FaXmark } from "react-icons/fa6";
 import { IoMdCheckmark } from "react-icons/io";
 import Loadding from "./Loadding";
 import axios from "axios";
 import styles from './style/chatoptionsconfig.module.less';
-import './style/chatregisterapi.less';
+import './style/chatinstituation.less';
 
 export function ConfigHeader() {
     const { setIs, is } = useGlobal()
@@ -27,6 +27,7 @@ export function ConfigHeader() {
 
 export default function ChatInstitution() {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
+    const institutionApiUrl = import.meta.env.VITE_API_INSTITUTION_URL;
     const [apiData, setApiData] = useState({ apiKey: "" });
     const [listings, setListings] = useState([]);
     const [editApi, setEditApi] = useState({ id: null, apiKey: "" });
@@ -60,7 +61,7 @@ export default function ChatInstitution() {
     const handleListings = async () => {
         const token = JSON.parse(localStorage.getItem("userData"))?.token || null;
         try {
-            const response = await axios.get(`http://192.46.208.144:8080/experimentalbrain/api/v1/techclient/alltechveinclients`,
+            const response = await axios.get(`${institutionApiUrl}/experimentalbrain/api/v1/techclient/alltechveinclients`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -123,55 +124,55 @@ export default function ChatInstitution() {
                 <div className={classnames(styles.inner, 'flex-1')}>
                     <div className="container">
                         <div className="row">
-                            <div className="inline-col dfsfd">
+                            <div className="inline-col">
                                 <div className="card">
                                     <div className="card-body">
-                                        <h5 className="card-title">Institution Creation</h5>
+                                        <h5 className="card-title">Manage Institutions</h5>
                                     </div>
-                                    <form className="form-inline" onSubmit={handleApi}>
-                                        <div className="input-group">
-                                            <label className="sr-only">API Keys</label>
-                                            <input
-                                                name="apiKey"
-                                                type="text"
-                                                className="form-control"
-                                                placeholder="Enter your API"
-                                                value={apiData.apiKey}
-                                                onChange={(e) => setApiData({ apiKey: e.target.value })}
-                                                required
-                                            />
-                                        </div>
-                                        <button type="submit" className="btn">Submit</button>
-                                    </form>
-                                    <div className="card-body">
-                                        <h5 className="card-title">Manage API Keys</h5>
-                                    </div>
-                                    <div className="input-group2">
-                                        <table className="user-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>SL No</th>
-                                                    <th>Techvein ID</th>
-                                                    <th>Client Name</th>
-                                                    <th>Application URL</th>
-                                                    <th>Redirect URL</th>
-                                                    <th>Client ID</th>
-                                                    <th>Client Secret</th>
-                                                    <th>EDVEIN Username</th>
-                                                    <th>EDVEIN Password</th>
-                                                    <th>Edit</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {listings?.length > 0 && listings?.map((apidata, index) => (
+                                    <button className="btn btn-primary">Manage</button>
+                                    <div className="table-responsive">
+                                    <table className="user-table">
+                                        <thead>
+                                            <tr>
+                                                <th>SL No</th>
+                                                <th>Techvein ID</th>
+                                                <th>Client Name</th>
+                                                <th>Application URL</th>
+                                                <th>Redirect URL</th>
+                                                <th>Client ID</th>
+                                                <th>Client Secret</th>
+                                                <th>EDVEIN Username</th>
+                                                <th>EDVEIN Password</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {listings?.length > 0 ? (
+                                                listings.map((apidata, index) => (
                                                     <tr key={index}>
                                                         <td>{index + 1}</td>
                                                         <td>{apidata?.id || 'N/A'}</td>
                                                         <td>{apidata?.clientName || 'N/A'}</td>
-                                                        <td>{apidata?.appUrl || 'N/A'}</td>
-                                                        <td>{apidata?.redirectUrl || 'N/A'}</td>
+                                                        <td>
+                                                            <a
+                                                                href={apidata?.appUrl}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
+                                                                {apidata?.appUrl || 'N/A'}
+                                                            </a>
+                                                        </td>
+                                                        <td>
+                                                            <a
+                                                                href={apidata?.redirectUrl}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
+                                                                {apidata?.redirectUrl || 'N/A'}
+                                                            </a>
+                                                        </td>
                                                         <td>{apidata?.clientId || 'N/A'}</td>
-                                                        <td>{apidata?.clientServer || 'N/A'}</td>
+                                                        <td>{apidata?.clientSecret || 'N/A'}</td>
                                                         <td>{apidata?.edveinName || 'N/A'}</td>
                                                         <td>{apidata?.edveinPsswd || 'N/A'}</td>
                                                         <td>
@@ -180,47 +181,53 @@ export default function ChatInstitution() {
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => handleUpdate(apidata?.id)}
-                                                                        className="button"
+                                                                        className="button success"
                                                                     >
                                                                         <IoMdCheckmark />
                                                                     </button>
                                                                     <button
                                                                         type="button"
                                                                         onClick={handleCancelEdit}
-                                                                        className="button"
+                                                                        className="button danger"
                                                                     >
                                                                         <FaXmark />
                                                                     </button>
                                                                 </>
                                                             ) : (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleEditClick(apidata)}
-                                                                    className="button"
-                                                                >
-                                                                    <FaRegEdit />
-                                                                </button>
+                                                                <>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleEditClick(apidata)}
+                                                                        className="button"
+                                                                    >
+                                                                        <FaRegEdit />
+                                                                    </button>
+                                                                    {/* <button
+                                                                            type="button"
+                                                                            onClick={() => handleDelete(apidata?.id)}
+                                                                            className="button danger"
+                                                                        >
+                                                                            <FaTrash />
+                                                                        </button> */}
+                                                                </>
                                                             )}
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => handleDelete(apidata?.id)}
-                                                                className="button"
-                                                            >
-                                                                <FaTrash />
-                                                            </button>
                                                         </td>
                                                     </tr>
-                                                ))}
-                                            </tbody>
-
-                                        </table>
-                                    </div>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="10">No data available</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </Suspense>
+        </div>
+        </Suspense >
     );
 }
