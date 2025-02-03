@@ -1,10 +1,11 @@
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import ChatApp from "./ChatApp";
 import axios from "axios";
 import experimental_brain_logo from "../assets/images/avatar.png"
 import Loadding from "./Loadding";
 import './style/chatlogin.less'
+import { jwtDecode } from "jwt-decode";
 
 export default function ChatLogin() {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -290,6 +291,37 @@ export default function ChatLogin() {
         }
     };
 
+    useEffect(() => {
+        const checkTokenExpiration = () => {
+            const userDataString = localStorage.getItem("userData");
+            if (userDataString) {
+                try {
+                    const userData = JSON.parse(userDataString);
+                    const token = userData?.token;
+
+                    if (!token) return;
+
+                    const decodedToken = jwtDecode(token);
+
+                    const currentTime = Date.now() / 1000;
+                    console.log(decodedToken.exp, "decode exp", currentTime, "current time stam");
+                    if (decodedToken.exp < currentTime) {
+                        localStorage.removeItem("userData");
+                        toast.error("Session expired. Please log in again.", { position: "top-right" });
+
+                        setTimeout(() => {
+                            // window.location.href = "/";
+                            setShowChat(false);
+                        }, 3000);
+                    }
+                } catch (error) {
+                    console.error("Error decoding token:", error);
+                }
+            }
+        };
+
+        checkTokenExpiration();
+    }, []);
 
 
     return (

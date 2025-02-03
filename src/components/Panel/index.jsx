@@ -31,7 +31,7 @@ export function Panel(props) {
   const { children, title, className } = props
   return (
     <div className={classnames(styles.panel, className)}>
-      {title && <Title type="h4" className={styles.title}>{title}</Title>}
+      {title && <Title type="h6" className={styles.title}>{title}</Title>}
       <div className={styles.children}>{children}</div>
     </div>
   )

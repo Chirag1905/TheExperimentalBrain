@@ -5,8 +5,6 @@ import { Title } from '../components/Title';
 import { classnames } from '../components/utils';
 import { toast, ToastContainer } from "react-toastify";
 import { FaRegEdit } from "react-icons/fa";
-import { FaTrash, FaXmark } from "react-icons/fa6";
-import { IoMdCheckmark } from "react-icons/io";
 import Loadding from "./Loadding";
 import axios from "axios";
 import styles from './style/chatoptionsconfig.module.less';
@@ -38,44 +36,12 @@ export default function ChatInstitution() {
         edveinPassword: "",
     });
     const [listings, setListings] = useState([]);
-    const [editApi, setEditApi] = useState({ id: null, apiKey: "" });
     const [isModalOpen, setModalOpen] = useState(false);
+    const [isModalEdit, setIsModalEdit] = useState(false);
+    const [institutionID, setInstitutionID] = useState(null)
 
-    useEffect(() => {
-        handleListings();
-    }, []);
 
-    //Inserting Apikey
-    const handleApi = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await axios.post(`${apiUrl}/api`, {
-                ...institutionData
-            }, {
-                headers: { "Content-Type": "application/json" }
-            });
-            if (response?.status === 201 || response?.status === 200) {
-                toast?.success("API added successfully");
-                setInstitutionData({
-                    clientName: "",
-                    applicationURL: "",
-                    redirectURL: "",
-                    clientID: "",
-                    clientSecret: "",
-                    edveinUsername: "",
-                    edveinPassword: "",
-                });
-                handleListings();
-            } else {
-                throw new Error("Failed to add API");
-            }
-        } catch (error) {
-            toast?.error("Registration error");
-        }
-    };
-
-    //Listing Apikey
-    const handleListings = async () => {
+    const getInstitutionList = async () => {
         const token = JSON.parse(localStorage.getItem("userData"))?.token || null;
         try {
             const response = await axios.get(`${institutionApiUrl}/experimentalbrain/api/v1/techclient/alltechveinclients`,
@@ -91,47 +57,146 @@ export default function ChatInstitution() {
         }
     };
 
-    //Updating Apikey
-    const handleEditClick = (apidata) => {
-        setEditApi({ id: apidata.id, apiKey: apidata.apiKey });
-    };
-    const handleCancelEdit = () => {
-        setEditApi({ id: null, apiKey: "" });
-    };
-    const handleUpdate = async (id) => {
+
+    useEffect(() => {
+        getInstitutionList();
+    }, []);
+
+    const handleOnSubmit = async (e) => {
+
+        e.preventDefault();
+
+        const token = JSON.parse(localStorage.getItem("userData"))?.token || null;
+
+        const institutionObject = {
+            appUrl: institutionData.applicationURL,
+            clientId: institutionData.clientID,
+            clientSecret: institutionData.clientSecret,
+            edveinPsswd: institutionData.edveinPassword,
+            edveinUserName: institutionData.edveinUsername,
+            isActive: true,
+            redirectUrl: institutionData.redirectURL,
+            schoolName: institutionData.clientName
+        }
+
+        console.log(institutionObject, "institutionObject")
+
         try {
-            const response = await axios.patch(`${apiUrl}/api/${id}`, {
-                apiKey: editApi.apiKey,
-            }, {
-                headers: { "Content-Type": "application/json" }
+            const response = await axios.post(`${institutionApiUrl}/experimentalbrain/api/v1/techclient/createtechveinclient`, institutionObject, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                }
             });
 
-            if (response?.status === 200) {
-                toast?.info("API edited successfully");
-                handleListings();
-                handleCancelEdit();
-            } else {
-                throw new Error(`Failed to edit API. Status code: ${response?.status}`);
+            const newResponse = response?.data
+            if (response.status === 201) {
+                if (newResponse?.response === "success") {
+                    setModalOpen(false);
+                    getInstitutionList();
+                    toast.success(newResponse?.responseReason, { theme: "colored" });
+                    setInstitutionData({
+                        clientName: "",
+                        applicationURL: "",
+                        redirectURL: "",
+                        clientID: "",
+                        clientSecret: "",
+                        edveinUsername: "",
+                        edveinPassword: "",
+                    });
+                } else {
+                    throw new Error("Failed to add API");
+                }
             }
+
         } catch (error) {
-            toast?.error("Error updating API");
+            console.log(error);
         }
     };
 
-    //Deleting Apikey
-    const handleDelete = async (id) => {
-        try {
-            const response = await axios.delete(`${apiUrl}/api/${id}`);
-            if (response?.status === 200 || response?.status === 204) {
-                toast.error("API deleted successfully");
-                setListings(listings?.filter(apidata => apidata.id !== id));
-            } else {
-                throw new Error(`Failed to delete API. Status code: ${response?.status}`);
+
+    const InstitutionUpdate = async (Id) => {
+
+        const token = JSON.parse(localStorage.getItem("userData"))?.token || null;
+        const response = await axios.get(`${institutionApiUrl}/experimentalbrain/api/v1/techclient/techveinclient/${Id}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
             }
-        } catch (error) {
-            toast?.error("Error deleting API");
-        }
+        });
+
+        const details = response?.data || {};
+
+        setInstitutionID(Id)
+
+        setInstitutionData({
+            clientName: details.schoolName || "",
+            applicationURL: details.appUrl || "",
+            redirectURL: details.redirectUrl || "",
+            clientID: details.clientId || "",
+            clientSecret: details.clientServer || "",
+            edveinUsername: details.edveinName || "",
+            edveinPassword: details.edveinPsswd || "",
+        });
     };
+
+    const handleOnUpdate = async (e) => {
+        e.preventDefault();
+        const token = JSON.parse(localStorage.getItem("userData"))?.token || null;
+
+        const institutionObject = {
+            appUrl: institutionData.applicationURL,
+            clientId: institutionData.clientID,
+            clientSecret: institutionData.clientSecret,
+            edveinPsswd: institutionData.edveinPassword,
+            edveinUserName: institutionData.edveinUsername,
+            isActive: true,
+            redirectUrl: institutionData.redirectURL,
+            schoolName: institutionData.clientName
+        }
+        try {
+            const response = await axios.put(`${institutionApiUrl}/experimentalbrain/api/v1/techclient/updatetechveinclient/${institutionID}`, institutionObject, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            console.log(response.status === 200);
+
+            const newResponse = response?.data
+
+            if (response.status === 200) {
+                if (newResponse?.response === "success") {
+                    setIsModalEdit(false);
+                    getInstitutionList();
+                    toast.success(newResponse?.responseReason, { theme: "colored" });
+                } else {
+                    throw new Error("Failed to add API");
+                }
+            }
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+    const handleAddClick = () => {
+        setIsModalEdit(false);
+        setInstitutionID(null)
+        setModalOpen(true)
+        setInstitutionData({
+            clientName: "",
+            applicationURL: "",
+            redirectURL: "",
+            clientID: "",
+            clientSecret: "",
+            edveinUsername: "",
+            edveinPassword: "",
+        });
+    };
+
 
     return (
         <Suspense fallback={<Loadding />}>
@@ -148,7 +213,7 @@ export default function ChatInstitution() {
                                     </div>
                                     <div className="myBtn">
                                         <button className="btn btn-primary" onClick={() => {
-                                            setModalOpen(true)
+                                            handleAddClick()
                                         }}>Add Institution</button>
                                     </div>
                                     <div className="table-responsive">
@@ -193,45 +258,18 @@ export default function ChatInstitution() {
                                                                 </a>
                                                             </td>
                                                             <td>{apidata?.clientId || 'N/A'}</td>
-                                                            <td>{apidata?.clientSecret || 'N/A'}</td>
+                                                            <td>{apidata?.clientServer || 'N/A'}</td>
                                                             <td>{apidata?.edveinName || 'N/A'}</td>
                                                             <td>{apidata?.edveinPsswd || 'N/A'}</td>
                                                             <td>
-                                                                {editApi?.id === apidata?.id ? (
-                                                                    <>
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => handleUpdate(apidata?.id)}
-                                                                            className="button success"
-                                                                        >
-                                                                            <IoMdCheckmark />
-                                                                        </button>
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={handleCancelEdit}
-                                                                            className="button danger"
-                                                                        >
-                                                                            <FaXmark />
-                                                                        </button>
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => handleEditClick(apidata)}
-                                                                            className="button"
-                                                                        >
-                                                                            <FaRegEdit />
-                                                                        </button>
-                                                                        {/* <button
-                                                                            type="button"
-                                                                            onClick={() => handleDelete(apidata?.id)}
-                                                                            className="button danger"
-                                                                        >
-                                                                            <FaTrash />
-                                                                        </button> */}
-                                                                    </>
-                                                                )}
+
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => { InstitutionUpdate(apidata?.id); setIsModalEdit(true); }}
+                                                                    className="button"
+                                                                >
+                                                                    <FaRegEdit />
+                                                                </button>
                                                             </td>
                                                         </tr>
                                                     ))
@@ -249,6 +287,8 @@ export default function ChatInstitution() {
                     </div>
                 </div>
             </div>
+
+            {/*================================ add modal========================================== */}
             {isModalOpen && (
                 <div className="modal">
                     <div className="modal-content">
@@ -256,16 +296,16 @@ export default function ChatInstitution() {
                             &times;
                         </span>
                         <h5>Add New Institution</h5>
-                        <form onSubmit={handleApi}>
+                        <form onSubmit={handleOnSubmit}>
                             <div className="form-group">
-                                <label htmlFor="apiKey">Client Name</label>
+                                <label htmlFor="clientName">Client Name</label>
                                 <input
-                                    id="apiKey"
-                                    name="apiKey"
+                                    id="clientName"
+                                    name="clientName"
                                     type="text"
                                     className="form-control"
                                     placeholder="Enter Client Name"
-                                    value={institutionData?.clientName}
+                                    value={institutionData?.clientName || ""}
                                     onChange={(e) =>
                                         setInstitutionData({ ...institutionData, clientName: e.target.value })
                                     }
@@ -273,14 +313,14 @@ export default function ChatInstitution() {
                                 />
                             </div>
                             <div className="form-group">
-                                <label htmlFor="apiKey">Application URL</label>
+                                <label htmlFor="applicationURL">Application URL</label>
                                 <input
-                                    id="apiKey"
-                                    name="apiKey"
+                                    id="applicationURL"
+                                    name="applicationURL"
                                     type="text"
                                     className="form-control"
                                     placeholder="Enter Application URL"
-                                    value={institutionData?.applicationURL}
+                                    value={institutionData?.applicationURL || ""}
                                     onChange={(e) =>
                                         setInstitutionData({ ...institutionData, applicationURL: e.target.value })
                                     }
@@ -288,14 +328,14 @@ export default function ChatInstitution() {
                                 />
                             </div>
                             <div className="form-group">
-                                <label htmlFor="apiKey">Redirect URL</label>
+                                <label htmlFor="redirectURL">Redirect URL</label>
                                 <input
-                                    id="apiKey"
-                                    name="apiKey"
+                                    id="redirectURL"
+                                    name="redirectURL"
                                     type="text"
                                     className="form-control"
                                     placeholder="Enter Redirect URL"
-                                    value={institutionData?.redirectURL}
+                                    value={institutionData?.redirectURL || ""}
                                     onChange={(e) =>
                                         setInstitutionData({ ...institutionData, redirectURL: e.target.value })
                                     }
@@ -303,14 +343,14 @@ export default function ChatInstitution() {
                                 />
                             </div>
                             <div className="form-group">
-                                <label htmlFor="apiKey">Client ID</label>
+                                <label htmlFor="clientID">Client ID</label>
                                 <input
-                                    id="apiKey"
-                                    name="apiKey"
+                                    id="clientID"
+                                    name="clientID"
                                     type="text"
                                     className="form-control"
                                     placeholder="Enter Client ID"
-                                    value={institutionData?.clientID}
+                                    value={institutionData?.clientID || ""}
                                     onChange={(e) =>
                                         setInstitutionData({ ...institutionData, clientID: e.target.value })
                                     }
@@ -318,14 +358,14 @@ export default function ChatInstitution() {
                                 />
                             </div>
                             <div className="form-group">
-                                <label htmlFor="apiKey">Client Secret</label>
+                                <label htmlFor="clientSecret">Client Secret</label>
                                 <input
-                                    id="apiKey"
-                                    name="apiKey"
+                                    id="clientSecret"
+                                    name="clientSecret"
                                     type="text"
                                     className="form-control"
                                     placeholder="Enter Client Secret"
-                                    value={institutionData?.clientSecret}
+                                    value={institutionData?.clientSecret || ""}
                                     onChange={(e) =>
                                         setInstitutionData({ ...institutionData, clientSecret: e.target.value })
                                     }
@@ -333,14 +373,14 @@ export default function ChatInstitution() {
                                 />
                             </div>
                             <div className="form-group">
-                                <label htmlFor="apiKey">EDVEIN Username</label>
+                                <label htmlFor="edveinUsername">EDVEIN Username</label>
                                 <input
-                                    id="apiKey"
-                                    name="apiKey"
+                                    id="edveinUsername"
+                                    name="edveinUsername"
                                     type="text"
                                     className="form-control"
                                     placeholder="Enter EDVEIN Username"
-                                    value={institutionData?.edveinUsername}
+                                    value={institutionData?.edveinUsername || ""}
                                     onChange={(e) =>
                                         setInstitutionData({ ...institutionData, edveinUsername: e.target.value })
                                     }
@@ -348,22 +388,145 @@ export default function ChatInstitution() {
                                 />
                             </div>
                             <div className="form-group">
-                                <label htmlFor="apiKey">EDVEIN Password</label>
+                                <label htmlFor="edveinPassword">EDVEIN Password</label>
                                 <input
-                                    id="apiKey"
-                                    name="apiKey"
+                                    id="edveinPassword"
+                                    name="edveinPassword"
                                     type="text"
                                     className="form-control"
                                     placeholder="Enter EDVEIN Password"
-                                    value={institutionData?.edveinPassword}
+                                    value={institutionData?.edveinPassword || ""}
                                     onChange={(e) =>
                                         setInstitutionData({ ...institutionData, edveinPassword: e.target.value })
                                     }
                                     required
                                 />
                             </div>
-                            <button type="submit" className="btn btn-success">
+                            <button type="submit" className="btn btn-primary" style={{ cursor: "pointer" }}>
                                 Submit
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/*================================ edit modal========================================== */}
+
+            {isModalEdit && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <span className="close" onClick={() => setIsModalEdit(false)}>
+                            &times;
+                        </span>
+                        <h5>Update Institution</h5>
+                        <form onSubmit={handleOnUpdate}>
+                            <div className="form-group">
+                                <label htmlFor="clientName">Client Name</label>
+                                <input
+                                    id="clientName"
+                                    name="clientName"
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Enter Client Name"
+                                    value={institutionData?.clientName || ""}
+                                    onChange={(e) =>
+                                        setInstitutionData({ ...institutionData, clientName: e.target.value })
+                                    }
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="applicationURL">Application URL</label>
+                                <input
+                                    id="applicationURL"
+                                    name="applicationURL"
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Enter Application URL"
+                                    value={institutionData?.applicationURL || ""}
+                                    onChange={(e) =>
+                                        setInstitutionData({ ...institutionData, applicationURL: e.target.value })
+                                    }
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="redirectURL">Redirect URL</label>
+                                <input
+                                    id="redirectURL"
+                                    name="redirectURL"
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Enter Redirect URL"
+                                    value={institutionData?.redirectURL || ""}
+                                    onChange={(e) =>
+                                        setInstitutionData({ ...institutionData, redirectURL: e.target.value })
+                                    }
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="clientID">Client ID</label>
+                                <input
+                                    id="clientID"
+                                    name="clientID"
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Enter Client ID"
+                                    value={institutionData?.clientID || ""}
+                                    onChange={(e) =>
+                                        setInstitutionData({ ...institutionData, clientID: e.target.value })
+                                    }
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="clientSecret">Client Secret</label>
+                                <input
+                                    id="clientSecret"
+                                    name="clientSecret"
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Enter Client Secret"
+                                    value={institutionData?.clientSecret || ""}
+                                    onChange={(e) =>
+                                        setInstitutionData({ ...institutionData, clientSecret: e.target.value })
+                                    }
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="edveinUsername">EDVEIN Username</label>
+                                <input
+                                    id="edveinUsername"
+                                    name="edveinUsername"
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Enter EDVEIN Username"
+                                    value={institutionData?.edveinUsername || ""}
+                                    onChange={(e) =>
+                                        setInstitutionData({ ...institutionData, edveinUsername: e.target.value })
+                                    }
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="edveinPassword">EDVEIN Password</label>
+                                <input
+                                    id="edveinPassword"
+                                    name="edveinPassword"
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Enter EDVEIN Password"
+                                    value={institutionData?.edveinPassword || ""}
+                                    onChange={(e) =>
+                                        setInstitutionData({ ...institutionData, edveinPassword: e.target.value })
+                                    }
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="btn btn-success" style={{ cursor: "pointer" }}>
+                                Update
                             </button>
                         </form>
                     </div>

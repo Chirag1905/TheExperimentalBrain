@@ -13,7 +13,7 @@ export function ListEmpty() {
   return (
     <div className={classnames('empty-msg')}>
       <Icon type="message" />
-      <Title type="h3">No conversations found<br />Start a new conversation to begin storing them locally.</Title>
+      <Title type="h6">No conversations found<br />Start a new conversation to begin storing them locally.</Title>
     </div>
   )
 }
