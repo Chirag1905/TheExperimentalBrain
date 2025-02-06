@@ -402,7 +402,7 @@ export default function ChatInstitution() {
                                     required
                                 />
                             </div>
-                            <button type="submit" className="btn btn-primary" style={{ cursor: "pointer" }}>
+                            <button type="submit" className="btn" style={{ cursor: "pointer" }}>
                                 Submit
                             </button>
                         </form>
