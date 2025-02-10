@@ -3,6 +3,8 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
+import ReactLoading from "react-loading";
+import '../chat/style/loadding.less';
 
 const Authorize = () => {
     const navigate = useNavigate();
@@ -116,7 +118,8 @@ const Authorize = () => {
             }
 
             // Redirect after login
-            navigate("/");
+            // navigate("/");
+            window.location.href = "/"
         })
         .catch(error => {
             console.error("Error during authentication:", error);
@@ -124,7 +127,10 @@ const Authorize = () => {
         });
     }, []);
 
-    return <div>Authorizing...</div>;
+    return <div className="loading-container">
+                    <ReactLoading type="spin" color="#f35a2e" height={100} width={50} />
+                    <h2>Loading</h2>
+                </div>
 };
 
 export default Authorize;

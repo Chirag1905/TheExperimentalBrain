@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import ReactLoading from "react-loading";
+import '../chat/style/loadding.less';
 
 const AppAuthenticate = () => {
   const [redirectedUrl, setRedirectedUrl] = useState("");
@@ -34,16 +36,10 @@ const AppAuthenticate = () => {
   }, []);
 
   return (
-    <div className="form-container">
-      {redirectedUrl ? (
-        <div>
-          <h2>Authentication Successful!</h2>
-          <p>Redirected URL: {redirectedUrl}</p>
-        </div>
-      ) : (
-        <h1>Redirecting for authentication...</h1>
-      )}
-    </div>
+    <div className="loading-container">
+                <ReactLoading type="spin" color="#f35a2e" height={100} width={50} />
+                <h2>Loading</h2>
+            </div>
   );
 };
 
