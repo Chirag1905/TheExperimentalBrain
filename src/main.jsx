@@ -14,7 +14,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   // <React.StrictMode>
     <Suspense fallback={<Loadding />}>
     <ToastContainer />
-      <BrowserRouter>
+      <BrowserRouter basename="/teb/">
         <Routes>
           <Route path="/" element={<ChatLogin />} />
           <Route path="/authenticate" element={<AppAuthenticate />} />
