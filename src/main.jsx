@@ -11,7 +11,6 @@ import PageNotFound from './pages/PageNotFound.jsx';
 import Authorize from './utils/Authorize.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  // <React.StrictMode>
     <Suspense fallback={<Loadding />}>
     <ToastContainer />
       <BrowserRouter basename="/teb/">
@@ -23,5 +22,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         </Routes>
       </BrowserRouter>
     </Suspense>
-  // </React.StrictMode>,
 )
