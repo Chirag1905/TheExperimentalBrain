@@ -119,7 +119,7 @@ const Authorize = () => {
 
             // Redirect after login
             // navigate("/");
-            window.location.href = "/"
+            window.location.href = "/teb/"
         })
         .catch(error => {
             console.error("Error during authentication:", error);

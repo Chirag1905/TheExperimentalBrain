@@ -16,7 +16,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <BrowserRouter basename="/teb/">
         <Routes>
           <Route path="/" element={<ChatLogin />} />
-          <Route path="/authenticate" element={<AppAuthenticate />} />
+          <Route path="/auth" element={<AppAuthenticate />} />
           <Route path="/authroize" element={<Authorize />} />
           {/* <Route path="*" element={<PageNotFound />} /> */}
         </Routes>
