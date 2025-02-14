@@ -43,6 +43,9 @@ export default function ChatOpitons() {
         <ConfigHeader />
         <div className={classnames(styles.inner, 'flex-1')}>
           <Panel className={styles.panel} title="Account">
+            <Panel.Item icon="user" title="User Name" >
+              <Input value={userInfo.email} placeholder="Personalize your AI pair programmer" />
+            </Panel.Item>
             <Panel.Item title="Avatar" desc="If selected,  will switch between different appearances following your system settings" icon="user">
               <Avatar src={account.avatar} />
             </Panel.Item>
