@@ -15,7 +15,9 @@ export const MessagesContext = createContext(null);
 
 const userRole = localStorage.getItem('userData');
 let userInfo = userRole ? JSON.parse(userRole) : {};
-const SERVER_URL = userInfo.id ? `http://localhost:8000/sessions/${userInfo.id}` : null;
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
+const SERVER_URL = userInfo.id ? `${apiUrl}/sessions/${userInfo.id}` : null;
 
 
 export const ChatProvider = ({ children }) => {

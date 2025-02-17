@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react'
-import { Icon} from '../components/Icon'
-import { Title} from '../components/Title'
-import { Textarea} from '../components/Textarea'
-import { Popover} from '../components/Popover'
+import { Icon } from '../components/Icon'
+import { Title } from '../components/Title'
+import { Textarea } from '../components/Textarea'
+import { Popover } from '../components/Popover'
 import { Button } from '../components/Button'
 import { useGlobal } from './context'
 import { classnames } from '../components/utils'
@@ -13,11 +13,11 @@ export function ListEmpty() {
   return (
     <div className={classnames('empty-msg')}>
       <Icon type="message" />
-      <Title type="h6">No conversations found<br />Start a new conversation to begin storing them locally.</Title>
+      <Title type="h3">No conversations found<br />Start a new conversation to begin storing them locally.</Title>
     </div>
   )
 }
- 
+
 export function ListTool(props) {
   const { removeChat, setState } = useGlobal();
 
@@ -35,7 +35,10 @@ ListTool.propTypes = {
 
 export function CreateNew() {
   const { newChat } = useGlobal()
-  return <div className={styles.new} onClick={newChat}><Icon type="add" />New Conversations</div>
+  return <div className={styles.new} onClick={(e) => {
+    e.preventDefault()
+    newChat()
+  }}><Icon type="add" />New Conversations</div>
 }
 
 export function ColorIcon({ onChange }) {
@@ -95,7 +98,7 @@ TagIco.propTypes = {
   color: PropTypes.number.isRequired
 };
 
-TagIco.displayName = 'TagIco'; 
+TagIco.displayName = 'TagIco';
 
 export { TagIco };
 
@@ -129,13 +132,18 @@ EditItem.propTypes = {
 export function ChatItem(props) {
   const { icon } = props;
   const [color, ico] = icon || [1, 'files'];
-  const { setState, currentChat, currentEditor } = useGlobal();
+  const { setState, currentChat, currentEditor, stopResponseIfOn, chat } = useGlobal();
   const item = (
     <>
       <TagIco ico={ico} color={color} />
-      <div className={styles.title}>
+      <div className={styles.title} onClick={() => {
+        stopResponseIfOn()
+      }}>
         <div className={styles.title_item}>
-          <div className={styles.title_p}>{props.title || "Untitled Chat"}</div>
+          <div className={styles.title_p} style={{
+            height:"12px",
+            width: "125px"
+          }}>{props?.messages[props?.messages?.length % 2 === 0 ? props?.messages?.length - 2 : props?.messages?.length - 1]?.content || "Untitled Chat"}</div>
         </div>
         <div className={styles.message}>{props?.messages?.length} messages</div>
       </div>
@@ -167,6 +175,8 @@ export function ChatList() {
     }
     return false
   })
+
+  // console.log(updated_chat_list, "updated_chat_list")
   // console.log({updated_chat_list, search_text})
   return (
     <div className={styles.list}>
