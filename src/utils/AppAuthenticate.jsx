@@ -48,7 +48,7 @@ const AppAuthenticate = () => {
           console.log(result)
         })
         // Redirect to OAuth URL
-        // window.location.href = authURL;
+        window.location.href = authURL;
       })
       .catch((error) => {
         console.error("Error fetching client details:", error);

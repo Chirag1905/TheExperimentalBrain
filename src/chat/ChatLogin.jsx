@@ -141,7 +141,8 @@ export default function ChatLogin() {
         } catch (error) {
             toast.error("Session error");
         }finally {
-            window.location.href = "/";
+            // window.location.href = "/";
+            window.location.reload()
         }
     };
 
