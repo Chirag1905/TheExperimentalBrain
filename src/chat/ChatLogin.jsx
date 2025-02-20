@@ -13,6 +13,15 @@ export default function ChatLogin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    const decodeToken = (token) => {
+        try {
+            return jwtDecode(token);
+        } catch (error) {
+            console.error("Invalid Token", error);
+            return null;
+        }
+    };
+
     const handleSession = async () => {
         try {
             const userRole = localStorage.getItem('userData');
@@ -140,9 +149,29 @@ export default function ChatLogin() {
             }
         } catch (error) {
             toast.error("Session error");
-        }finally {
-            // window.location.href = "/";
-            window.location.reload()
+        } finally {
+            window.location.reload();
+        }
+    };
+
+    const updateUser = async (userId, updatedData) => {
+        try {
+            const response = await fetch(`${apiUrl}/users/${userId}`, {
+                method: "PATCH", // Use "PUT" if you want to replace the entire user object
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(updatedData),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to update user");
+            }
+
+            const result = await response.json();
+            console.log("User updated:", result);
+        } catch (error) {
+            console.error("Error updating user:", error);
         }
     };
 
@@ -210,7 +239,8 @@ export default function ChatLogin() {
     //     }
     // };
 
-    const handleSubmit = async (e) => {
+
+    const checkLogin = async (e) => {
         e.preventDefault();
 
         // First API login attempt
@@ -226,17 +256,36 @@ export default function ChatLogin() {
                 }
             );
 
+            const myToken = decodeToken(firstApiResponse.data.token);
+            console.log(myToken, "token data")
+
+            const newUserID = Date.now().toString();
+
             // Check response for success
             if (firstApiResponse?.data?.status === 200 && firstApiResponse?.data?.token) {
+                const response = await fetch(`${apiUrl}/users`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password, role: "User", id: newUserID }), // Unique ID
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to create user");
+                }
+
+                const data = await response.json();
+                console.log("User created successfully:", data);
                 const userData = {
-                    email,
-                    role: "Admin",
+                    id: newUserID,
+                    email: myToken.sub,
+                    role: "User",
                     token: firstApiResponse.data.token,
                     expiresAt: Date.now() + firstApiResponse.data.expiresIn,
                 };
                 localStorage.setItem("userData", JSON.stringify(userData));
                 toast.success("Login Successful");
                 setShowChat(true);
+                await handleSession();
                 console.log("Login successful via first API");
                 return;
             }
@@ -256,7 +305,69 @@ export default function ChatLogin() {
                 console.error("First API Login Error:", error.message);
                 toast.error("An error occurred while trying to log in.");
             }
+        } finally {
+            window.location.reload();
         }
+    }
+
+
+    const checkAndUpdate = async (userID, userEmail, userRole, userPassword) => {
+        // e.preventDefault();
+
+        // First API login attempt
+        try {
+            const firstApiResponse = await axios.post(
+                "http://192.46.208.144:8080/experimentalbrain/auth/login",
+                {
+                    userName: email,
+                    password,
+                },
+                {
+                    headers: { "Content-Type": "application/json" },
+                }
+            );
+
+            // Check response for success
+            if (firstApiResponse?.data?.status === 200 && firstApiResponse?.data?.token) {
+                updateUser(userID, {
+                    email: userEmail,
+                    password: userPassword,
+                })
+                const userData = {
+                    id: userID,
+                    email: userEmail,
+                    role: userRole,
+                };
+                localStorage.setItem("userData", JSON.stringify(userData));
+                toast.success("Login Successful");
+                setShowChat(true);
+                await handleSession();
+                console.log("Login successful via first API");
+                return;
+            }
+
+            // If no token or unexpected structure, treat as failure
+            const errorDescription = firstApiResponse?.data?.properties?.description || "Login failed: Invalid response structure";
+            toast.error(errorDescription);
+            console.warn("Login failed via first API");
+        } catch (error) {
+            // Handle error cases
+            if (error.response) {
+                const errorDescription = error.response.data?.properties?.description || "An error occurred";
+                toast.error(`Login failed: ${errorDescription}`);
+                console.error("First API Login Error:", errorDescription);
+            } else {
+                // Network or unexpected errors
+                console.error("First API Login Error:", error.message);
+                toast.error("An error occurred while trying to log in.");
+            }
+        } finally {
+            window.location.reload();
+        }
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
         // Secondary API login attempt
         try {
@@ -272,8 +383,13 @@ export default function ChatLogin() {
             const user = users.find((user) => user.email === email);
 
             if (!user) {
+                checkLogin()
                 toast.warn("User not found");
                 return;
+            }
+
+            if (user.password === null) {
+                checkAndUpdate(user.id, user.email, user.role, user.password)
             }
 
             if (user.password !== password) {
