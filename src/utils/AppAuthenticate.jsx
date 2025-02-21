@@ -41,7 +41,7 @@ const AppAuthenticate = () => {
         setFormData(updatedFormData);
 
         // Redirect instead of sending a POST request
-        const authURL = `${response.data.appUrl}/oauth/authorize/? client_id=${updatedFormData.client_id}&redirect_uri=${updatedFormData.redirect_uri}&response_type=code`;
+        const authURL = `${response.data.appUrl}/oauth/authorize/?client_id=${updatedFormData.client_id}&redirect_uri=${updatedFormData.redirect_uri}&response_type=code`;
         console.log(authURL, "authURL");
 
         // axios.get("https://techveindemo.edvein.com/oauth/authorize/?client_id=37fc0732135685cbfaace63b15d98baae1475fbf869d93fb1fc24b92da60f145%20&redirect_uri=http://edveins.techvein.org/techcode.html%20&response_type=code").then((result)=>{
