@@ -33,6 +33,7 @@ export default function ChatLogin() {
             let userInfo;
             try {
                 userInfo = JSON.parse(userRole);
+                console.log("🚀 ~ handleSession ~ userInfo:", userInfo)
             } catch (error) {
                 toast.error("Error parsing user data");
                 return;
@@ -47,7 +48,7 @@ export default function ChatLogin() {
 
             // Check if a session with the same userInfo.id already exists
             if (existingSessions?.some(session => session.id === userInfo.id)) {
-                toast.warn("Session Already Exists");
+                console.log("Session Already Exists");
                 return;
             }
 
@@ -143,7 +144,7 @@ export default function ChatLogin() {
             });
 
             if (sessionResponse?.status === 201 || sessionResponse?.status === 200) {
-                toast.success("Session Added successfully");
+                console.log("Session Create successfully");
             } else {
                 throw new Error("Failed to add Session");
             }
@@ -154,73 +155,251 @@ export default function ChatLogin() {
         }
     };
 
-    const updateUser = async (userId, updatedData) => {
+    // const updateUser = async (userId, updatedData) => {
+    //     try {
+    //         const response = await fetch(`${apiUrl}/users/${userId}`, {
+    //             method: "PATCH", // Use "PUT" if you want to replace the entire user object
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //             body: JSON.stringify(updatedData),
+    //         });
+
+    //         if (!response.ok) {
+    //             throw new Error("Failed to update user");
+    //         }
+
+    //         const result = await response.json();
+    //         console.log("User updated:", result);
+    //     } catch (error) {
+    //         console.error("Error updating user:", error);
+    //     }
+    // };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
         try {
-            const response = await fetch(`${apiUrl}/users/${userId}`, {
-                method: "PATCH", // Use "PUT" if you want to replace the entire user object
-                headers: {
-                    "Content-Type": "application/json",
+            // First API call
+            const firstApiResponse = await axios.post(
+                "http://192.46.208.144:8080/experimentalbrain/auth/login",
+                {
+                    userName: email,
+                    password: password,
                 },
-                body: JSON.stringify(updatedData),
-            });
+                {
+                    headers: { "Content-Type": "application/json" },
+                }
+            );
 
-            if (!response.ok) {
-                throw new Error("Failed to update user");
+            // Check if the first API call was successful
+            if (firstApiResponse?.data?.status === 200) {
+                const userData = {
+                    id: firstApiResponse?.data?.techveinClientId,
+                    email: firstApiResponse?.data?.user_info?.full_name,
+                    token: firstApiResponse?.data?.token,
+                    role: "Admin",
+                };
+                localStorage.setItem("userData", JSON.stringify(userData));
+                await handleSession();
+                setShowChat(true);
+                toast.success("Login Successful via First API", {
+                    theme: 'colored',
+                    autoClose: 1000,
+                });
+                return;
+            } else if (firstApiResponse?.data?.status === 401) {
+                try {
+                    const response = await axios.get(`${apiUrl}/users`, {
+                        headers: { "Content-Type": "application/json" },
+                    });
+
+                    if (!response.data || response?.status !== 200) {
+                        throw new Error("Failed to fetch user data");
+                    }
+                    const users = response.data;
+                    const user = users.find((user) => user.email.toLowerCase() === email.toLowerCase());
+                    if (!user) {
+                        toast.warn("User not found");
+                        return;
+                    }
+                    if (user.password !== password) {
+                        toast.error("Incorrect password");
+                        return;
+                    }
+                    const userData = {
+                        id: user?.id,
+                        email: user?.email,
+                        role: user?.role,
+                    };
+                    localStorage.setItem("userData", JSON.stringify(userData));
+                    await handleSession();
+                    setShowChat(true);
+                    toast.success("Login Successful via Second API", {
+                        theme: 'colored',
+                        autoClose: 1000,
+                    });
+                } catch (error) {
+                    console.log(`API login error: ${error.message}`);
+                    toast.error("Login failed. Please try again.");
+                }
             }
-
-            const result = await response.json();
-            console.log("User updated:", result);
         } catch (error) {
-            console.error("Error updating user:", error);
+            console.warn("First API failed, trying second API...");
         }
     };
 
-    // const handleSubmit = async (e) => {
+
+    // const checkLogin = async (e) => {
     //     e.preventDefault();
+
+    //     // First API login attempt
     //     try {
-    //         // Construct the first API URL with query parameters
     //         const firstApiResponse = await axios.post(
     //             "http://192.46.208.144:8080/experimentalbrain/auth/login",
     //             {
-    //                 "userName": email,
-    //                 "password": password,
+    //                 userName: email,
+    //                 password,
     //             },
     //             {
     //                 headers: { "Content-Type": "application/json" },
     //             }
     //         );
 
-    //         if (firstApiResponse?.status === 200) {
+    //         const myToken = decodeToken(firstApiResponse.data.token);
+    //         console.log(myToken, "token data")
+
+    //         const newUserID = Date.now().toString();
+
+    //         // Check response for success
+    //         if (firstApiResponse?.data?.status === 200 && firstApiResponse?.data?.token) {
+    //             const response = await fetch(`${apiUrl}/users`, {
+    //                 method: "POST",
+    //                 headers: { "Content-Type": "application/json" },
+    //                 body: JSON.stringify({ email, password, role: "Admin", id: newUserID }), // Unique ID
+    //             });
+
+    //             if (!response.ok) {
+    //                 throw new Error("Failed to create user");
+    //             }
+
+    //             const data = await response.json();
+    //             console.log("User created successfully:", data);
     //             const userData = {
-    //                 email: "userName",
-    //                 role: "User",
+    //                 id: newUserID,
+    //                 email: myToken.sub,
+    //                 role: "Admin",
+    //                 token: firstApiResponse.data.token,
+    //                 expiresAt: Date.now() + firstApiResponse.data.expiresIn,
     //             };
     //             localStorage.setItem("userData", JSON.stringify(userData));
     //             toast.success("Login Successful");
     //             setShowChat(true);
+    //             await handleSession();
     //             console.log("Login successful via first API");
     //             return;
     //         }
-    //     } catch (error) {
-    //         console.log(`Login error: ${error.message}`);
-    //     }
 
+    //         // If no token or unexpected structure, treat as failure
+    //         const errorDescription = firstApiResponse?.data?.properties?.description || "Login failed: Invalid response structure";
+    //         toast.error(errorDescription);
+    //         console.warn("Login failed via first API");
+    //     } catch (error) {
+    //         // Handle error cases
+    //         if (error.response) {
+    //             const errorDescription = error.response.data?.properties?.description || "An error occurred";
+    //             toast.error(`Login failed: ${errorDescription}`);
+    //             console.error("First API Login Error:", errorDescription);
+    //         } else {
+    //             // Network or unexpected errors
+    //             console.error("First API Login Error:", error.message);
+    //             toast.error("An error occurred while trying to log in.");
+    //         }
+    //     } finally {
+    //         window.location.reload();
+    //     }
+    // }
+
+
+    // const checkAndUpdate = async (userID, userEmail, userRole, userPassword) => {
+    //     // e.preventDefault();
+
+    //     // First API login attempt
     //     try {
-    //         // Second API call
+    //         const firstApiResponse = await axios.post(
+    //             "http://192.46.208.144:8080/experimentalbrain/auth/login",
+    //             {
+    //                 userName: email,
+    //                 password,
+    //             },
+    //             {
+    //                 headers: { "Content-Type": "application/json" },
+    //             }
+    //         );
+
+    //         // Check response for success
+    //         if (firstApiResponse?.data?.status === 200 && firstApiResponse?.data?.token) {
+    //             updateUser(userID, {
+    //                 email: userEmail,
+    //                 password: userPassword,
+    //             })
+    //             const userData = {
+    //                 id: userID,
+    //                 email: userEmail,
+    //                 role: 'Admin',
+    //             };
+    //             localStorage.setItem("userData", JSON.stringify(userData));
+    //             toast.success("Login Successful");
+    //             setShowChat(true);
+    //             await handleSession();
+    //             console.log("Login successful via first API");
+    //             return;
+    //         }
+
+    //         // If no token or unexpected structure, treat as failure
+    //         const errorDescription = firstApiResponse?.data?.properties?.description || "Login failed: Invalid response structure";
+    //         toast.error(errorDescription);
+    //         console.warn("Login failed via first API");
+    //     } catch (error) {
+    //         // Handle error cases
+    //         if (error.response) {
+    //             const errorDescription = error.response.data?.properties?.description || "An error occurred";
+    //             toast.error(`Login failed: ${errorDescription}`);
+    //             console.error("First API Login Error:", errorDescription);
+    //         } else {
+    //             // Network or unexpected errors
+    //             console.error("First API Login Error:", error.message);
+    //             toast.error("An error occurred while trying to log in.");
+    //         }
+    //     } finally {
+    //         window.location.reload();
+    //     }
+    // }
+
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+
+    //     // Secondary API login attempt
+    //     try {
     //         const response = await axios.get(`${apiUrl}/users`, {
     //             headers: { "Content-Type": "application/json" },
     //         });
 
     //         if (response?.status !== 200) {
-    //             throw new Error("Failed to fetch user data");
+    //             throw new Error("Failed to fetch user data from secondary API");
     //         }
 
     //         const users = response.data;
     //         const user = users.find((user) => user.email === email);
 
     //         if (!user) {
+    //             checkLogin()
     //             toast.warn("User not found");
     //             return;
+    //         }
+
+    //         if (user.password === null) {
+    //             checkAndUpdate(user.id, user.email, user.role, user.password)
     //         }
 
     //         if (user.password !== password) {
@@ -228,187 +407,19 @@ export default function ChatLogin() {
     //             return;
     //         }
 
+    //         // Valid user, proceed with login
     //         delete user.password;
     //         localStorage.setItem("userData", JSON.stringify(user));
     //         toast.success("Login Successful");
     //         console.log("Login successful via second API");
-    //         await handleSession(); // Ensure session is handled before showing chat
+    //         await handleSession();
     //         setShowChat(true);
     //     } catch (error) {
+    //         console.error("Second API Login Error:", error.message);
     //         toast.error(`Login error: ${error.message}`);
     //     }
     // };
 
-
-    const checkLogin = async (e) => {
-        e.preventDefault();
-
-        // First API login attempt
-        try {
-            const firstApiResponse = await axios.post(
-                "http://192.46.208.144:8080/experimentalbrain/auth/login",
-                {
-                    userName: email,
-                    password,
-                },
-                {
-                    headers: { "Content-Type": "application/json" },
-                }
-            );
-
-            const myToken = decodeToken(firstApiResponse.data.token);
-            console.log(myToken, "token data")
-
-            const newUserID = Date.now().toString();
-
-            // Check response for success
-            if (firstApiResponse?.data?.status === 200 && firstApiResponse?.data?.token) {
-                const response = await fetch(`${apiUrl}/users`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password, role: "Admin", id: newUserID }), // Unique ID
-                });
-
-                if (!response.ok) {
-                    throw new Error("Failed to create user");
-                }
-
-                const data = await response.json();
-                console.log("User created successfully:", data);
-                const userData = {
-                    id: newUserID,
-                    email: myToken.sub,
-                    role: "Admin",
-                    token: firstApiResponse.data.token,
-                    expiresAt: Date.now() + firstApiResponse.data.expiresIn,
-                };
-                localStorage.setItem("userData", JSON.stringify(userData));
-                toast.success("Login Successful");
-                setShowChat(true);
-                await handleSession();
-                console.log("Login successful via first API");
-                return;
-            }
-
-            // If no token or unexpected structure, treat as failure
-            const errorDescription = firstApiResponse?.data?.properties?.description || "Login failed: Invalid response structure";
-            toast.error(errorDescription);
-            console.warn("Login failed via first API");
-        } catch (error) {
-            // Handle error cases
-            if (error.response) {
-                const errorDescription = error.response.data?.properties?.description || "An error occurred";
-                toast.error(`Login failed: ${errorDescription}`);
-                console.error("First API Login Error:", errorDescription);
-            } else {
-                // Network or unexpected errors
-                console.error("First API Login Error:", error.message);
-                toast.error("An error occurred while trying to log in.");
-            }
-        } finally {
-            window.location.reload();
-        }
-    }
-
-
-    const checkAndUpdate = async (userID, userEmail, userRole, userPassword) => {
-        // e.preventDefault();
-
-        // First API login attempt
-        try {
-            const firstApiResponse = await axios.post(
-                "http://192.46.208.144:8080/experimentalbrain/auth/login",
-                {
-                    userName: email,
-                    password,
-                },
-                {
-                    headers: { "Content-Type": "application/json" },
-                }
-            );
-
-            // Check response for success
-            if (firstApiResponse?.data?.status === 200 && firstApiResponse?.data?.token) {
-                updateUser(userID, {
-                    email: userEmail,
-                    password: userPassword,
-                })
-                const userData = {
-                    id: userID,
-                    email: userEmail,
-                    role: 'Admin',
-                };
-                localStorage.setItem("userData", JSON.stringify(userData));
-                toast.success("Login Successful");
-                setShowChat(true);
-                await handleSession();
-                console.log("Login successful via first API");
-                return;
-            }
-
-            // If no token or unexpected structure, treat as failure
-            const errorDescription = firstApiResponse?.data?.properties?.description || "Login failed: Invalid response structure";
-            toast.error(errorDescription);
-            console.warn("Login failed via first API");
-        } catch (error) {
-            // Handle error cases
-            if (error.response) {
-                const errorDescription = error.response.data?.properties?.description || "An error occurred";
-                toast.error(`Login failed: ${errorDescription}`);
-                console.error("First API Login Error:", errorDescription);
-            } else {
-                // Network or unexpected errors
-                console.error("First API Login Error:", error.message);
-                toast.error("An error occurred while trying to log in.");
-            }
-        } finally {
-            window.location.reload();
-        }
-    }
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        // Secondary API login attempt
-        try {
-            const response = await axios.get(`${apiUrl}/users`, {
-                headers: { "Content-Type": "application/json" },
-            });
-
-            if (response?.status !== 200) {
-                throw new Error("Failed to fetch user data from secondary API");
-            }
-
-            const users = response.data;
-            const user = users.find((user) => user.email === email);
-
-            if (!user) {
-                checkLogin()
-                toast.warn("User not found");
-                return;
-            }
-
-            if (user.password === null) {
-                checkAndUpdate(user.id, user.email, user.role, user.password)
-            }
-
-            if (user.password !== password) {
-                toast.error("Incorrect password");
-                return;
-            }
-
-            // Valid user, proceed with login
-            delete user.password;
-            localStorage.setItem("userData", JSON.stringify(user));
-            toast.success("Login Successful");
-            console.log("Login successful via second API");
-            await handleSession();
-            setShowChat(true);
-        } catch (error) {
-            console.error("Second API Login Error:", error.message);
-            toast.error(`Login error: ${error.message}`);
-        }
-    };
 
     useEffect(() => {
         const checkTokenExpiration = () => {
@@ -423,7 +434,7 @@ export default function ChatLogin() {
                     const decodedToken = jwtDecode(token);
 
                     const currentTime = Date.now() / 1000;
-                    console.log(decodedToken.exp, "decode exp", currentTime, "current time stam");
+                    // console.log(decodedToken.exp, "decode exp", currentTime, "current time stam");
                     if (decodedToken.exp < currentTime) {
                         localStorage.removeItem("userData");
                         toast.error("Session expired. Please log in again.", { position: "top-right" });
@@ -441,7 +452,6 @@ export default function ChatLogin() {
 
         checkTokenExpiration();
     }, []);
-
 
     return (
         <Suspense fallback={<Loadding />}>

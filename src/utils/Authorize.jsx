@@ -10,15 +10,6 @@ const Authorize = () => {
     const navigate = useNavigate();
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-    const decodeToken = (token) => {
-        try {
-            return jwtDecode(token);
-        } catch (error) {
-            console.error("Invalid Token", error);
-            return null;
-        }
-    };
-
     const handleSession = async () => {
         try {
             const userRole = localStorage.getItem('userData');
@@ -177,115 +168,41 @@ const Authorize = () => {
                     return;
                 }
 
-                const responseData = await axios.get(`${apiUrl}/users`, {
-                    headers: { "Content-Type": "application/json" },
-                });
+                // const responseData = await axios.get(`${apiUrl}/users`, {
+                //     headers: { "Content-Type": "application/json" },
+                // });
 
-                if (responseData?.status !== 200) {
-                    throw new Error("Failed to fetch user data from secondary API");
-                }
-
-                const users = responseData.data;
-                const user = users.find((user) => user.email === response.data.user_info.username);
-
-                if (!user) {
-                    const newUserID = Date.now().toString();
-
-                    await fetch("http://45.79.120.63:8000/users", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ email: response.data.user_info.username, password: null, role: response.data.user_info.type, id: newUserID }), // Unique ID
-                    });
-                    const userData = {
-                        id: newUserID,
-                        email: response.data.user_info.email,
-                        role: "User",
-                        token: response.data.token,
-                        expiresAt: Date.now() + response.data.expiresIn,
-                    };
-                    localStorage.setItem("userData", JSON.stringify(userData));
-                    localStorage.removeItem("userCodeData");
-                } else {
-                    localStorage.setItem("userData", JSON.stringify(user));
-                    localStorage.removeItem("userCodeData");
-                }
-
-                await handleSession();
-
-
-                // Check if session exists
-                // try {
-                //     const existingSessionsResponse = await axios.get(`${apiUrl}/sessions`, {
-                //         headers: { "Content-Type": "application/json" }
-                //     });
-
-                //     const existingSessions = existingSessionsResponse?.data;
-
-                //     if (!existingSessions.some(session => session.id === userData.id)) {
-                //         // Create a new session
-                //         await axios.post(`${apiUrl}/sessions`, {
-                //             id: userData.id,
-                //             chat: [],
-                //             chats: [],
-                //             conversation: [],
-                //             current: 0,
-                //             currentChat: 0,
-                //             is: {
-                //                 ChatInstitution: false,
-                //                 ChatApi: false,
-                //                 ChatRegister: false,
-                //                 apps: true,
-                //                 config: false,
-                //                 fullScreen: true,
-                //                 inputing: false,
-                //                 sidebar: true,
-                //                 thinking: false,
-                //                 typeing: false,
-                //             },
-                //             options: {
-                //                 account: {
-                //                     name: "CHAT——AI",
-                //                     avatar: ""
-                //                 },
-                //                 general: {
-                //                     command: "ENTER",
-                //                     language: "English",
-                //                     size: "normal",
-                //                     theme: "light"
-                //                 },
-                //                 openai: {
-                //                     apiKey: "",
-                //                     baseUrl: "",
-                //                     max_tokens: 2048,
-                //                     model: "gpt-4-turbo",
-                //                     n: 1,
-                //                     organizationId: "",
-                //                     stream: true,
-                //                     temperature: 1,
-                //                 }
-                //             },
-                //             search_text: "",
-                //             selected_attachment: "",
-                //             selected_grade: "",
-                //             typeingMessage: {},
-                //             version: "0.1.0",
-                //         }, {
-                //             headers: { "Content-Type": "application/json" }
-                //         });
-
-                //         toast.success("Session created successfully");
-                //     } else {
-                //         toast.info("Session already exists");
-                //     }
-
-                // } catch (sessionError) {
-                //     console.error("Error handling session:", sessionError);
-                //     toast.error("Session handling failed");
+                // if (responseData?.status !== 200) {
+                //     throw new Error("Failed to fetch user data from secondary API");
                 // }
 
-                // Redirect after login
+                // const users = responseData.data;
+                // const user = users.find((user) => user.email === response.data.user_info.username);
+
+                // if (!user) {
+                //     const newUserID = Date.now().toString();
+                //     await fetch("http://45.79.120.63:8000/users", {
+                //         method: "POST",
+                //         headers: { "Content-Type": "application/json" },
+                //         body: JSON.stringify({ email: response.data.user_info.username, password: null, role: response.data.user_info.type, id: newUserID }),
+                //     });
+                //     const userData = {
+                //         id: newUserID,
+                //         email: response.data.user_info.email,
+                //         role: "User",
+                //         token: response.data.token,
+                //         expiresAt: Date.now() + response.data.expiresIn,
+                //     };
+                //     localStorage.setItem("userData", JSON.stringify(userData));
+                //     localStorage.removeItem("userCodeData");
+                // } else {
+                //     localStorage.setItem("userData", JSON.stringify(user));
+                //     localStorage.removeItem("userCodeData");
+                // }
+
+                await handleSession();
                 // navigate("/");
-                window.location.href = "/teb/"
+                // window.location.href = "/teb/"
             })
             .catch(error => {
                 console.error("Error during authentication:", error);
