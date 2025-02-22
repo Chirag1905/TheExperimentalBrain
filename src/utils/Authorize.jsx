@@ -199,7 +199,7 @@ const Authorize = () => {
                     const userData = {
                         id: newUserID,
                         email: response.data.user_info.email,
-                        role: response.data.user_info.type,
+                        role: "User",
                         token: response.data.token,
                         expiresAt: Date.now() + response.data.expiresIn,
                     };

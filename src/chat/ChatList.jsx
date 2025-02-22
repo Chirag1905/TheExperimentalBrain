@@ -141,8 +141,11 @@ export function ChatItem(props) {
       }}>
         <div className={styles.title_item}>
           <div className={styles.title_p} style={{
-            height:"12px",
-            width: "125px"
+            width: "125px",
+            fontSize: "13px",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis"
           }}>{props?.messages[props?.messages?.length % 2 === 0 ? props?.messages?.length - 2 : props?.messages?.length - 1]?.content || "Untitled Chat"}</div>
         </div>
         <div className={styles.message}>{props?.messages?.length} messages</div>

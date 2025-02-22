@@ -266,7 +266,7 @@ export default function ChatLogin() {
                 const response = await fetch(`${apiUrl}/users`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password, role: "User", id: newUserID }), // Unique ID
+                    body: JSON.stringify({ email, password, role: "Admin", id: newUserID }), // Unique ID
                 });
 
                 if (!response.ok) {
@@ -278,7 +278,7 @@ export default function ChatLogin() {
                 const userData = {
                     id: newUserID,
                     email: myToken.sub,
-                    role: "User",
+                    role: "Admin",
                     token: firstApiResponse.data.token,
                     expiresAt: Date.now() + firstApiResponse.data.expiresIn,
                 };
@@ -336,7 +336,7 @@ export default function ChatLogin() {
                 const userData = {
                     id: userID,
                     email: userEmail,
-                    role: userRole,
+                    role: 'Admin',
                 };
                 localStorage.setItem("userData", JSON.stringify(userData));
                 toast.success("Login Successful");
