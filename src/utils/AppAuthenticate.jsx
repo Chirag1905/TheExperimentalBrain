@@ -32,6 +32,8 @@ const AppAuthenticate = () => {
           throw new Error("appUrl is missing in API response");
         }
 
+        localStorage.setItem("userCodeData", JSON.stringify(response.data));
+
         const updatedFormData = {
           client_id: response.data.clientId || "",
           redirect_uri: response.data.redirectUrl || "",
