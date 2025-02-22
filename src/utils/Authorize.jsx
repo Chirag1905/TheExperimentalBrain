@@ -285,7 +285,7 @@ const Authorize = () => {
 
                 // Redirect after login
                 // navigate("/");
-                window.location.href = "/teb/"
+                // window.location.href = "/teb/"
             })
             .catch(error => {
                 console.error("Error during authentication:", error);
