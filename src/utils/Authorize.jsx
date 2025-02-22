@@ -156,9 +156,7 @@ const Authorize = () => {
             console.error("No userCodeData found in localStorage.");
             return;
         }
-
         const codeData = JSON.parse(storedData);
-
         axios.post(`http://192.46.208.144:8080/experimentalbrain/auth/fedauthenticate?client_id=${codeData.clientId}&client_secret=${codeData.clientServer}&grant_type=authorization_code&redirect_uri=${codeData.redirectUrl}&code=${tokenFromUrl}&appUrl=${codeData.appUrl}`)
             .then(async (response) => {
                 console.log("API Response:", response.data);
@@ -167,42 +165,16 @@ const Authorize = () => {
                     console.error("Invalid API response:", response.data);
                     return;
                 }
-
-                // const responseData = await axios.get(`${apiUrl}/users`, {
-                //     headers: { "Content-Type": "application/json" },
-                // });
-
-                // if (responseData?.status !== 200) {
-                //     throw new Error("Failed to fetch user data from secondary API");
-                // }
-
-                // const users = responseData.data;
-                // const user = users.find((user) => user.email === response.data.user_info.username);
-
-                // if (!user) {
-                //     const newUserID = Date.now().toString();
-                //     await fetch("http://45.79.120.63:8000/users", {
-                //         method: "POST",
-                //         headers: { "Content-Type": "application/json" },
-                //         body: JSON.stringify({ email: response.data.user_info.username, password: null, role: response.data.user_info.type, id: newUserID }),
-                //     });
-                //     const userData = {
-                //         id: newUserID,
-                //         email: response.data.user_info.email,
-                //         role: "User",
-                //         token: response.data.token,
-                //         expiresAt: Date.now() + response.data.expiresIn,
-                //     };
-                //     localStorage.setItem("userData", JSON.stringify(userData));
-                //     localStorage.removeItem("userCodeData");
-                // } else {
-                //     localStorage.setItem("userData", JSON.stringify(user));
-                //     localStorage.removeItem("userCodeData");
-                // }
-
+                const userData = {
+                    id: response?.data?.techveinClientId,
+                    email: response?.data?.user_info?.full_name,
+                    token: response?.data?.token,
+                    role: "User",
+                };
+                localStorage.setItem("userData", JSON.stringify(userData));
                 await handleSession();
                 // navigate("/");
-                // window.location.href = "/teb/"
+                window.location.href = "/teb/"
             })
             .catch(error => {
                 console.error("Error during authentication:", error);
