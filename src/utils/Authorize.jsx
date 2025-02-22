@@ -170,6 +170,8 @@ const Authorize = () => {
 
         axios.post(`http://192.46.208.144:8080/experimentalbrain/auth/fedauthenticate?client_id=${codeData.clientId}&client_secret=${codeData.clientServer}&grant_type=authorization_code&redirect_uri=${codeData.redirectUrl}&code=${tokenFromUrl}&appUrl=${codeData.appUrl}`)
             .then(async (response) => {
+                localStorage.setItem("userTest", JSON.stringify(response.data));
+
                 console.log("API Response:", response.data);
 
                 if (!response.data || !response.data.user_info) {
