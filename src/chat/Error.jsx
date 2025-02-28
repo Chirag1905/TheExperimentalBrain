@@ -9,6 +9,7 @@ export default function Error() {
 
   useEffect(()=>{
     toast(`${chatError.message}`, "error");
+    localStorage.setItem('stop', false)
   }, [chatError])
   return (
    <>

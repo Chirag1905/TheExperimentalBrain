@@ -8,10 +8,11 @@ import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import PropTypes from 'prop-types';
 import './style/markdown.less';
+import {Img} from 'react-image'
 
-const IMG_SIZE = 850;
+const IMG_SIZE = 600;
 const RenderImage = ({ children }) => (
-  <img src={children} height={IMG_SIZE} width={IMG_SIZE} alt="img" loading='lazy' />
+  <Img src={children} height={IMG_SIZE} width={IMG_SIZE} alt="img" loading='lazy' />
 );
 
 RenderImage.propTypes = {

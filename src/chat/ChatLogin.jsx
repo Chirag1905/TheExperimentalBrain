@@ -453,6 +453,12 @@ export default function ChatLogin() {
         checkTokenExpiration();
     }, []);
 
+    useEffect(() => {
+        if(localStorage.getItem("stop")){
+            localStorage.setItem("stop", false)
+        }
+    },[])
+
     return (
         <Suspense fallback={<Loadding />}>
             <ToastContainer draggable theme="colored" />

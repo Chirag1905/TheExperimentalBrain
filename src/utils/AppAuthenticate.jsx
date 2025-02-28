@@ -12,6 +12,10 @@ const AppAuthenticate = () => {
   const tokenFromUrl = urlParams.get("code");
 
   useEffect(() => {
+
+    localStorage.removeItem("stop")
+    localStorage.removeItem("userData")
+
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const tokenFromUrl = urlParams.get("code");
