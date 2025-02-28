@@ -8,7 +8,7 @@ export default function Error() {
   const chatError = chat[currentChat]?.error || {}
 
   useEffect(()=>{
-    toast(`${chatError.message}`, "error");
+    // toast(`${chatError.message}`, "error");
     localStorage.setItem('stop', false)
   }, [chatError])
   return (

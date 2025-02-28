@@ -15,6 +15,7 @@ const AppAuthenticate = () => {
 
     localStorage.removeItem("stop")
     localStorage.removeItem("userData")
+    localStorage.removeItem('currentChat');
 
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);

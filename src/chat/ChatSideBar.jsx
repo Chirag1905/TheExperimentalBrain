@@ -28,6 +28,7 @@ export default function ChatSideBar() {
                         onClick={() => {
                             setState({ is: { ...is, config: false, ChatRegister: false, ChatApi: false, ChatInstitution: false } });
                             localStorage.removeItem("userData");
+                            localStorage.removeItem('currentChat');
                             location.reload();
                             // setState({ is: { ...is, config: !is.config, register: false } })
                         }}

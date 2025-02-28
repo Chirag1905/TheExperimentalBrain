@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import { fetchStream } from "../service/openai.mjs";
 // import { setAbortController } from "../service/abortController.mjs";
 
@@ -27,6 +28,8 @@ export default function action(state, dispatch) {
         selected_grade,
         selected_attachment,
       } = state;
+      localStorage.setItem("currentChat", currentChat)
+
       await setState({
          is: { ...is, thinking: true, content: '' },
        });
@@ -117,7 +120,11 @@ export default function action(state, dispatch) {
          localStorage.setItem("stop", false);
         },
         onError(res) {
+          localStorage.setItem("stop", false);
           console.log(res);
+            if(res.error){
+              toast(res.error.message, "error");
+            }
           const { error } = res || {};
           if (error) {
             newChat.splice(currentChat, 1, {

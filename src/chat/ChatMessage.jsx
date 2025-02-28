@@ -150,6 +150,7 @@ export function MessageBar() {
         sendMessage,
         setMessage,
         is,
+        currentChat,
         options,
         setIs,
         typeingMessage,
@@ -176,7 +177,7 @@ export function MessageBar() {
 
     return (
         <div className={styles.bar}>
-            {is.thinking && (
+            {is.thinking && Number(currentChat) === Number(localStorage.getItem('currentChat')) && (
                 <div className={styles.bar_tool}>
                     <div className={styles.bar_loading}>
                         <div className='flex-c'>
@@ -341,14 +342,14 @@ export function MessageContainer() {
 }
 
 export default function ChatMessage() {
-    const { is } = useGlobal();
+    const { is, currentChat } = useGlobal();
     return (
         <Suspense fallback={<div>Loading...</div>}>
             <div className={styles.message}>
                 <MessageHeader />
                 <ScrollView>
                     <MessageContainer />
-                    {is.thinking && <Loading />}
+                    {is.thinking && Number(currentChat) === Number(localStorage.getItem('currentChat')) && <Loading />}
                 </ScrollView>
                 <MessageBar />
             </div>

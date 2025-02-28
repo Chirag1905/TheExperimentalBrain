@@ -437,6 +437,7 @@ export default function ChatLogin() {
                     // console.log(decodedToken.exp, "decode exp", currentTime, "current time stam");
                     if (decodedToken.exp < currentTime) {
                         localStorage.removeItem("userData");
+                        localStorage.removeItem('currentChat');
                         toast.error("Session expired. Please log in again.", { position: "top-right" });
 
                         setTimeout(() => {

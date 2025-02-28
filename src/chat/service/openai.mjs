@@ -1,5 +1,6 @@
 import { createParser } from "eventsource-parser";
 import { setAbortController } from "./abortController.mjs";
+import { toast } from "react-toastify";
 
 export async function* streamAsyncIterable(stream) {
   const reader = stream.getReader();
@@ -104,6 +105,8 @@ export const fetchAction = async ({
     body,
     signal,
   });
+  console.log(response, "response response response")
+
   return response;
 };
 
