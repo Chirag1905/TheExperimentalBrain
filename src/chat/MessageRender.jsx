@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import './style/markdown.less';
 import {Img} from 'react-image'
 
-const IMG_SIZE = 600;
+const IMG_SIZE = 450;
 const RenderImage = ({ children }) => (
   <Img src={children} height={IMG_SIZE} width={IMG_SIZE} alt="img" loading='lazy' />
 );
