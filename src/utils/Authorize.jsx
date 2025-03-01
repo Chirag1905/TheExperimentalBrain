@@ -166,13 +166,13 @@ const Authorize = () => {
                     return;
                 }
                 const userData = {
-                    id: response?.data?.techveinClientId,
+                    id: response?.data?.user_info?.full_name + response?.data?.techveinClientId,
                     email: response?.data?.user_info?.full_name,
                     token: response?.data?.token,
                     role: "User",
                 };
                 localStorage.setItem("userData", JSON.stringify(userData));
-                localStorage.removeItem("userCodeData");
+                // localStorage.removeItem("userCodeData");
                 await handleSession();
                 // navigate("/");
                 window.location.href = "/teb/"
