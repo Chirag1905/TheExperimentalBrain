@@ -164,7 +164,7 @@ const Authorize = () => {
                     return;
                 }
                 const userData = {
-                    id: response?.data?.user_info?.username + response?.data?.techveinClientId,
+                    id: response?.data?.techveinClientId + response?.data?.user_info?.username,
                     email: response?.data?.user_info?.full_name,
                     token: response?.data?.token,
                     role: "User",
