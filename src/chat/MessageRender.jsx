@@ -2,7 +2,7 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight, oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useGlobal } from './context';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
@@ -11,9 +11,35 @@ import './style/markdown.less';
 import {Img} from 'react-image'
 
 const IMG_SIZE = 450;
-const RenderImage = ({ children }) => (
-  <Img src={children} height={IMG_SIZE} width={IMG_SIZE} alt="img" loading='lazy' />
-);
+
+const RenderImage = ({ children }) => {
+  const [isExpired, setIsExpired] = useState(false);
+
+  // Extract expiry time from the URL
+  const urlParams = new URL(children).searchParams;
+  const expiryTime = urlParams.get("se");
+  const expiryDate = expiryTime ? new Date(expiryTime) : null;
+
+  // Check if the URL is expired
+  const isURLExpired = expiryDate && new Date() > expiryDate;
+
+  return (
+    <>
+      {!isExpired && !isURLExpired ? (
+        <Img
+          src={children}
+          height={IMG_SIZE}
+          width={IMG_SIZE}
+          alt="img"
+          loading="lazy"
+          onError={() => setIsExpired(true)} // If image fails to load
+        />
+      ) : (
+        <p style={{ color: "red" }}>Your image is expired</p>
+      )}
+    </>
+  );
+};
 
 RenderImage.propTypes = {
   children: PropTypes.string.isRequired 

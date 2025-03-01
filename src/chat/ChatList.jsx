@@ -133,6 +133,7 @@ export function ChatItem(props) {
   const { icon } = props;
   const [color, ico] = icon || [1, 'files'];
   const { setState, currentChat, currentEditor, stopResponseIfOn, chat } = useGlobal();
+  console.log(props?.messages)
   const item = (
     <>
       <TagIco ico={ico} color={color} />
@@ -146,7 +147,7 @@ export function ChatItem(props) {
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis"
-          }}>{props?.messages[props?.messages?.length % 2 === 0 ? props?.messages?.length - 2 : props?.messages?.length - 1]?.content || "Untitled Chat"}</div>
+          }}>{props?.messages[props?.messages[props?.messages?.length-1]?.role === "assistant" ? props?.messages?.length - 2 : props?.messages?.length - 1]?.content || "Untitled Chat"}</div>
         </div>
         <div className={styles.message}>{props?.messages?.length} messages</div>
       </div>
