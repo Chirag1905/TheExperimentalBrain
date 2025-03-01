@@ -159,15 +159,12 @@ const Authorize = () => {
         const codeData = JSON.parse(storedData);
         axios.post(`http://192.46.208.144:8080/experimentalbrain/auth/fedauthenticate?client_id=${codeData.clientId}&client_secret=${codeData.clientServer}&grant_type=authorization_code&redirect_uri=${codeData.redirectUrl}&code=${tokenFromUrl}&appUrl=${codeData.appUrl}`)
             .then(async (response) => {
-                console.log("API Response:", response.data);
-
                 if (!response.data || !response.data.user_info) {
                     console.error("Invalid API response:", response.data);
                     return;
                 }
-                localStorage.setItem("userSpecified", JSON.stringify(response.data))
                 const userData = {
-                    id: response?.data?.user_info?.full_name + response?.data?.techveinClientId,
+                    id: response?.data?.user_info?.username + response?.data?.techveinClientId,
                     email: response?.data?.user_info?.full_name,
                     token: response?.data?.token,
                     role: "User",
