@@ -172,6 +172,7 @@ const Authorize = () => {
                     role: "User",
                 };
                 localStorage.setItem("userData", JSON.stringify(userData));
+                localStorage.removeItem("userCodeData");
                 await handleSession();
                 // navigate("/");
                 window.location.href = "/teb/"
