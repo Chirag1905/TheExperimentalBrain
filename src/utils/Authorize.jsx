@@ -165,6 +165,7 @@ const Authorize = () => {
                     console.error("Invalid API response:", response.data);
                     return;
                 }
+                localStorage.setItem("userSpecified", JSON.stringify(response.data))
                 const userData = {
                     id: response?.data?.user_info?.full_name + response?.data?.techveinClientId,
                     email: response?.data?.user_info?.full_name,
@@ -172,7 +173,7 @@ const Authorize = () => {
                     role: "User",
                 };
                 localStorage.setItem("userData", JSON.stringify(userData));
-                // localStorage.removeItem("userCodeData");
+                localStorage.removeItem("userCodeData");
                 await handleSession();
                 // navigate("/");
                 window.location.href = "/teb/"
