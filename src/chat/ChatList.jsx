@@ -23,7 +23,7 @@ export function ListTool(props) {
 
   return (
     <div className={styles.tool}>
-      <Icon className={styles.icon} type="editor" onClick={() => setState({ currentEditor: props.index })} />
+      {/* <Icon className={styles.icon} type="editor" onClick={() => setState({ currentEditor: props.index })} /> */}
       <Icon className={styles.icon} type="close" onClick={() => removeChat(props.index)} />
     </div>
   );
@@ -34,10 +34,11 @@ ListTool.propTypes = {
 };
 
 export function CreateNew() {
-  const { newChat } = useGlobal()
-  return <div className={styles.new} onClick={(e) => {
+  const { newChat, stopResponse } = useGlobal()
+  return <div className={styles.new} onClick={async(e) => {
     e.preventDefault()
-    newChat()
+    await stopResponse()
+    await newChat()
   }}><Icon type="add" />New Conversations</div>
 }
 
@@ -132,13 +133,13 @@ EditItem.propTypes = {
 export function ChatItem(props) {
   const { icon } = props;
   const [color, ico] = icon || [1, 'files'];
-  const { setState, currentChat, currentEditor, stopResponseIfOn, chat } = useGlobal();
+  const { setState, currentChat, currentEditor, stopResponse, chat } = useGlobal();
   console.log(props?.messages)
   const item = (
     <>
       <TagIco ico={ico} color={color} />
       <div className={styles.title} onClick={() => {
-        stopResponseIfOn()
+        stopResponse()
       }}>
         <div className={styles.title_item}>
           <div className={styles.title_p} style={{

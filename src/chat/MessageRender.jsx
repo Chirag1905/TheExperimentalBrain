@@ -33,6 +33,7 @@ const RenderImage = ({ children }) => {
           alt="img"
           loading="lazy"
           onError={() => setIsExpired(true)} // If image fails to load
+          loader={<p style={{ color: "green" }}>Loading image...</p>}
         />
       ) : (
         <p style={{ color: "red" }}>Your image is expired</p>

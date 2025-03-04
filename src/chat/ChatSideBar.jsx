@@ -33,11 +33,11 @@ export default function ChatSideBar() {
                             // setState({ is: { ...is, config: !is.config, register: false } })
                         }}
                     />
-                    <Icon
+                    {/* <Icon
                         className={styles.icon}
                         type='history'
                         onClick={() => setState({ is: { ...is, apps: false } })}
-                    />
+                    /> */}
                     <Icon
                         className={styles.icon}
                         type={options.general.theme}

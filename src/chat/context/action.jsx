@@ -213,7 +213,7 @@ export default function action(state, dispatch) {
     removeMessage(index) {
       const messages = state.chat[state.currentChat].messages;
       const chat = [...state.chat];
-      messages.splice(index, 1);
+      messages.splice(index, 2);
       chat[state.currentChat].messages = messages;
       setState({
         chat,

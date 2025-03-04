@@ -90,7 +90,7 @@ export function EditorMessage() {
 }
 
 export function MessageItem(props) {
-    const { content, sentTime, role, type } = props;
+    const { content, sentTime, role, type, myKey } = props;
     const { removeMessage } = useGlobal();
 
     return (
@@ -108,27 +108,29 @@ export function MessageItem(props) {
                             {dateFormat(sentTime)}
                         </div>
                         <div className={styles.item_bar}>
-                            <Tooltip text='Remove Messages'>
-                                <Icon
-                                    className={styles.icon}
-                                    type='trash'
-                                    onClick={removeMessage}
-                                />
-                            </Tooltip>
                             {role === 'user' ? (
                                 <>
-                                    <Icon
-                                        className={styles.icon}
-                                        type='reload'
-                                    />
                                     {/* <Icon
-                                        className={styles.icon}
-                                        type='editor'
-                                    /> */}
+                                            className={styles.icon}
+                                            type='reload'
+                                        /> */}
+                                    {/* <Icon
+                                            className={styles.icon}
+                                            type='editor'
+                                        /> */}
                                 </>
                             ) : (
                                 <CopyIcon value={content} />
                             )}
+                            {role === 'user' && <Tooltip text='Remove Messages'>
+                                <Icon
+                                    className={styles.icon}
+                                    type='trash'
+                                    onClick={async(e) => {
+                                        await removeMessage(myKey);
+                                    }}
+                                />
+                            </Tooltip>}
                         </div>
                     </div>
                     <MessageRender type={type}>{content.replace("OpenAI", "The Experimental Brain")}</MessageRender>
@@ -177,7 +179,7 @@ export function MessageBar() {
 
     return (
         <div className={styles.bar}>
-            {is.thinking && Number(currentChat) === Number(localStorage.getItem('currentChat')) && (
+            {is.thinking && selected_attachment !== "image" && Number(currentChat) === Number(localStorage.getItem('currentChat')) && (
                 <div className={styles.bar_tool}>
                     <div className={styles.bar_loading}>
                         <div className='flex-c'>
@@ -323,7 +325,7 @@ export function MessageContainer() {
                 {messages.length && currentChat !== -1 ? (
                     <div className={styles.container}>
                         {messages?.map((item, index) => (
-                            <MessageItem key={index} {...item} />
+                            <MessageItem key={index} myKey={index} {...item} />
                         ))}
                         {message?.error && <Error />}
                     </div>
